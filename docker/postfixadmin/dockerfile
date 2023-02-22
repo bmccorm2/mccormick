@@ -1,0 +1,16 @@
+# Use your favorite image
+FROM postfixadmin
+
+# Need to install dovecot-core to give access to the doveadm binary for encrypting passwords in argon2I!
+RUN apt update && \
+    apt upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+        dovecot-core && \
+    apt -y autoremove && \
+    apt -y clean autoclean && \
+    rm -drf /var/lib/apt/lists/* /tmp/* /var/tmp /var/cache
+
+# The generated SSL certs are needed to decrypt the passwords!
+# There is a soft link from this file to the real file in mail_virtual
+# This says where the files are.  The actual files are in the volume
+COPY ./10-ssl.conf /etc/dovecot/conf.d/

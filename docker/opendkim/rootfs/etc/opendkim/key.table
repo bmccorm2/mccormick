@@ -1,0 +1,2 @@
+default._domainkey.1mccormick.com     1mccormick.com:default:/etc/opendkim/keys/1mccormick.com/default.private
+default._domainkey.firestonelodging.com     firestonelodging.com:default:/etc/opendkim/keys/firestonelodging.com/default.private

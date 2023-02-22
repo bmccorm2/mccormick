@@ -1,0 +1,8 @@
+FROM instrumentisto/opendkim
+
+COPY ./rootfs/etc/opendkim /etc/opendkim
+RUN mkdir -p /etc/opendkim/keys/1mccormick.com && \
+    mkdir -p /etc/opendkim/keys/firestonelodging.com
+
+RUN chown -R opendkim:opendkim /etc/opendkim && \
+    chmod -R 744 /etc/opendkim

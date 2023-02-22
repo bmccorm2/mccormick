@@ -1,0 +1,127 @@
+# To bring up an environment, first define it: export ENV=dev
+# DEV - Next bring up the environment with its respective yml file: docker-compose up
+
+version: "3.7"
+
+services:
+  db:
+    container_name: db
+    image: postgres:alpine
+    restart: on-failure
+    env_file:
+      - env/db.env
+    volumes:
+      - /opt/db:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - www
+
+  postfixadmin:
+    container_name: postfixadmin
+    build: ./postfixadmin
+    restart: on-failure
+    hostname: postfixadmin
+    volumes:
+      - /opt/certs:/etc/certs:ro
+    depends_on:
+      - db
+      - mail # needs the cert generated from the mail client
+    env_file:
+      - env/postfixadmin.env
+    networks:
+      - www
+
+  mail:
+    build: ./mail
+    container_name: mail
+    hostname: mail
+    dns: 1.1.1.1
+    depends_on:
+      - opendkim
+      - mail.fl_cert
+    volumes:
+      - /var/log:/var/log
+      - /opt/certs:/etc/certs
+      - /opt/vmail:/opt/vmail
+    env_file:
+      - env/mail.env
+    ports:
+      - "25:25"
+      - "465:465"
+      - "993:993"
+    networks:
+      - www
+
+  opendkim:
+    build: ./opendkim
+    container_name: opendkim
+    volumes:
+      - /opt/opendkim/1mccormick.com/default.private:/etc/opendkim/keys/1mccormick.com/default.private
+      - /opt/opendkim/firestonelodging.com/default.private:/etc/opendkim/keys/firestonelodging.com/default.private
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - www
+
+  rainloop:
+    image: hardware/rainloop
+    container_name: rainloop
+    volumes:
+      - /opt/rainloop:/rainloop/data
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - env/rainloop.env
+    depends_on:
+      - mail
+    networks:
+      - www
+
+  mail.fl_cert:
+    build: ./mail.fl_cert
+    container_name: mail.fl_cert
+    env_file:
+      - env/mail.fl_cert.env
+    networks:
+      - www
+
+  service:
+    container_name: service
+    image: bmccorm2/service
+    restart: on-failure
+    depends_on:
+      - db
+    env_file:
+      - env/service.env
+    networks:
+      - www
+
+  nextcloud:
+    container_name: nextcloud
+    image: nextcloud:fpm-alpine
+    depends_on:
+      - db
+    volumes:
+      - /opt/nextcloud:/var/www/html
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    env_file:
+      - env/nextcloud.${ENV}.env
+    networks:
+      - www
+
+  nc-web:
+    build: ./nc-web
+    container_name: nc-web
+    restart: always
+    env_file:
+      - env/nc-web.${ENV}.env
+    volumes:
+      - /opt/nextcloud:/var/www/html:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - nextcloud
+    networks:
+      - www
+
+networks:
+  www:
+    external: true

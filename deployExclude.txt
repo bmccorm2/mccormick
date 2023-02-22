@@ -1,0 +1,7 @@
+www/sites/
+www/service/
+www/frontend/
+www/service1/
+www/web/
+www/scripts/
+www/env/

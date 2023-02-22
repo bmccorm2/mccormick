@@ -1,0 +1,116 @@
+# To bring up an environment, first define it: export ENV=dev
+# DEV - Next bring up the environment with its respective yml file: docker-compose up
+
+version: "3.7"
+
+services:
+  proxy:
+    build: ./proxy
+    container_name: proxy
+    restart: always
+    environment:
+      - TRUST_DOWNSTREAM_PROXY=false
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /opt/certs:/etc/nginx/certs
+      - /opt/vhost:/etc/nginx/vhost.d
+      - /opt/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /etc/static:/app/static:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - www
+      - privacy
+
+  ssl:
+    image: nginxproxy/acme-companion
+    container_name: ssl
+    depends_on:
+      - proxy
+    volumes:
+      - /opt/certs:/etc/nginx/certs
+      - /opt/vhost:/etc/nginx/vhost.d
+      - /opt/html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/acme:/etc/acme.sh
+      - /etc/localtime:/etc/localtime:ro
+    env_file:
+      - env/ssl.env
+    networks:
+      - www
+      - privacy
+
+  vault:
+    container_name: vault
+    image: vaultwarden/server:alpine
+    env_file:
+      - env/vault.${ENV}.env
+    depends_on:
+      - proxy
+    volumes:
+      - /opt/vault:/data
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    networks:
+      - www
+
+  pihole:
+    container_name: pihole
+    hostname: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    env_file:
+      - env/pihole.${ENV}.env
+    volumes:
+      - "./opt/pihole:/etc/pihole"
+      - "./opt/dnsmasq.d:/etc/dnsmasq.d"
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    networks:
+      privacy:
+        ipv4_address: 172.19.0.13
+
+  # unbound:
+  #   build: ./unbound
+  #   container_name: unbound
+  #   restart: unless-stopped
+  #   networks:
+  #     privacy:
+  #       ipv4_address: 172.19.0.14
+
+  vpn:
+    image: linuxserver/wireguard
+    container_name: vpn
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    env_file:
+      - env/vpn.${ENV}.env
+    volumes:
+      - /opt/vpn:/config
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      - privacy
+    restart: unless-stopped
+
+networks:
+  privacy:
+    name: privacy
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.19.0.0/24"
+  www:
+    name: www
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.26.0.0/24"

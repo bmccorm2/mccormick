@@ -1,0 +1,80 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type CarDetail {
+  id: Int!
+  url: String!
+  displayName: String!
+  color: String
+  effectiveDate: String!
+  price: Int
+  miles: Int
+  year: Int!
+  distance: Int
+  car: Car!
+}
+
+type Consumption {
+  id: Int!
+  price: Float!
+  gallons: Float!
+  miles: Float!
+  miles_per_gallon: Float
+  price_per_gallon: Float
+  date: DateTime!
+  notes: String
+  car: Car!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Car {
+  id: Int!
+  displayName: String!
+  searchUrl: String
+  isOwned: Boolean!
+}
+
+type Summary {
+  total_miles: Float
+  total_price: Float
+  total_gallons: Float
+  total_miles_per_gallon: Float
+  total_price_per_gallon: Float
+}
+
+type Yield {
+  id: Int!
+  oneMonth: Float!
+  twoMonth: Float!
+  threeMonth: Float!
+  sixMonth: Float!
+  oneYear: Float!
+  twoYear: Float!
+  threeYear: Float!
+  fiveYear: Float!
+  sevenYear: Float!
+  tenYear: Float!
+  twentyYear: Float!
+  thirtyYear: Float!
+  effectiveDate: String!
+}
+
+type Query {
+  carDetails(carId: Int!): [CarDetail!]!
+  cars(isOwned: Boolean): [Car!]
+  consumption(carId: Int!): [Consumption!]!
+  summary(carId: Int!): Summary!
+  yields: [Yield!]!
+}
+
+type Mutation {
+  createCarDetail(price: Int!, miles: Int!, year: Int!, displayName: String!, url: String!, distance: Int, carId: Int!, effectiveDate: String!): Boolean!
+  createCar(displayName: String!, searchUrl: String, isOwned: Boolean!): Boolean!
+  createConsumption(price: Float!, gallons: Float!, miles: Float!, notes: String, carId: Int!): Boolean!
+  createYield(oneMonth: Float!, twoMonth: Float!, threeMonth: Float!, sixMonth: Float!, oneYear: Float!, twoYear: Float!, threeYear: Float!, fiveYear: Float!, sevenYear: Float!, tenYear: Float!, twentyYear: Float!, thirtyYear: Float!, effectiveDate: String!): Boolean!
+}

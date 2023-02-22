@@ -1,0 +1,7 @@
+user = postfixadm
+password = o-(?Pc@,^<CB=?8]
+hosts = db
+dbname = postfixadmin
+#query = SELECT domain FROM domain WHERE domain='%s' AND active = true
+#optional query to use when relaying for backup MX
+query = SELECT domain FROM domain WHERE domain='%s' and backupmx = false and active = true

@@ -1,0 +1,55 @@
+FROM ubuntu:22.04
+ARG S6_OVERLAY_VERSION=3.1.3.0
+ARG SERVER_NAME=mail.1mccormick.com
+ARG TZ=America/Denver
+
+RUN ["/bin/bash", "-c","debconf-set-selections <<< \"postfix postfix/mailname string ${SERVER_NAME}\""]
+RUN ["/bin/bash", "-c","debconf-set-selections <<< \"postfix postfix/main_mailer_type string 'Internet Site'\""]
+
+RUN apt update && \
+    apt upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+        postfix postfix-pgsql postfix-policyd-spf-python policyd-rate-limit xz-utils tzdata \
+        dovecot-core dovecot-imapd dovecot-lmtpd dovecot-pgsql && \
+        # less vim iputils-ping telnet net-tools fish && \
+    apt -y autoremove && \
+    apt -y clean autoclean && \
+    rm -drf /var/lib/apt/lists/* /tmp/* /var/tmp /var/cache
+
+RUN groupadd -g 5000 vmail && \
+    useradd -u 5000 -m -g vmail -s /usr/sbin/nologin -d /opt/vmail vmail
+
+COPY ./postfix /etc/postfix
+COPY ./dovecot/ /etc/dovecot/
+COPY ./ssl /etc/ssl/
+COPY ./postfix/resolv.conf /var/spool/postfix/etc/resolv.conf
+COPY ./policyd/policyd-rate-limit.yaml /etc/policyd-rate-limit.yaml
+COPY ./policyd/utils.py /usr/lib/python3/dist-packages/policyd_rate_limit/utils.py
+COPY ./s6-rc/services /etc/s6-overlay/s6-rc.d
+
+COPY ./s6-rc/conf/postfix /etc/s6-overlay/s6-rc.d/user/contents.d/
+COPY ./s6-rc/conf/base /etc/s6-overlay/s6-rc.d/postfix/dependencies.d/
+COPY ./s6-rc/conf/policydRateLimit /etc/s6-overlay/s6-rc.d/postfix/dependencies.d/
+
+COPY ./s6-rc/conf/dovecot /etc/s6-overlay/s6-rc.d/user/contents.d/
+COPY ./s6-rc/conf/base /etc/s6-overlay/s6-rc.d/dovecot/dependencies.d/
+COPY ./s6-rc/conf/postfix /etc/s6-overlay/s6-rc.d/dovecot/dependencies.d/
+
+COPY ./s6-rc/conf/policydRateLimit /etc/s6-overlay/s6-rc.d/user/contents.d/
+COPY ./s6-rc/conf/base /etc/s6-overlay/s6-rc.d/policydRateLimit/dependencies.d/
+
+# postmap of sni_maps occurs in the service file!!
+RUN postmap /etc/postfix/helo_access && \
+    postmap /etc/postfix/sender_access && \
+    newaliases && \
+    gpasswd -a www-data dovecot
+
+RUN ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime
+
+# Add s6 overlay
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+
+ENTRYPOINT ["/init"]
