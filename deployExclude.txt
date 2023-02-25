@@ -1,7 +1,3 @@
-www/sites/
-www/service/
-www/frontend/
-www/service1/
-www/web/
-www/scripts/
-www/env/
+docker/scripts/
+deploy.sh
+db.sqlite3

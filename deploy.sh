@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rsync -trhPuL --exclude deploy.sh --delete docker 1mccormick:/opt
-# rsync -trhPuLv --exclude deploy.sh --exclude service/node_modules --delete service mail:/opt/temp
+rsync -trhPuL --exclude-from=deployExclude.txt --delete docker 1mccormick:/opt
+rsync -trhPuLv --exclude-from=deployExclude.txt --exclude service/node_modules --delete service 1mccormick:/opt/temp
 
 echo Complete!

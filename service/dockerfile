@@ -9,6 +9,8 @@ RUN pnpm build
 FROM node:alpine as production
 EXPOSE 4000
 WORKDIR /app
+RUN apk add tzdata
+ENV TZ=America/Denver
 RUN npm install -g pnpm
 COPY package.json ./
 COPY .env ./
