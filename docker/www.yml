@@ -38,7 +38,6 @@ services:
     dns: 1.1.1.1
     depends_on:
       - opendkim
-      - mail.fl_cert
     volumes:
       - /var/log:/var/log
       - /opt/certs:/etc/certs
@@ -72,14 +71,6 @@ services:
       - env/rainloop.env
     depends_on:
       - mail
-    networks:
-      - www
-
-  mail.fl_cert:
-    build: ./mail.fl_cert
-    container_name: mail.fl_cert
-    env_file:
-      - env/mail.fl_cert.env
     networks:
       - www
 

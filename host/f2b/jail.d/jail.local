@@ -61,10 +61,35 @@ maxmatches = %(maxretry)s
 
 # A host is banned if it has generated "maxretry" during the last "findtime"
 # seconds.
-findtime  = 10m
+findtime  = 1d
 
 # "maxretry" is the number of failures before a host get banned.
-maxretry = 5
+maxretry = 3
 
 # "bantime" is the number of seconds that a host is banned.
 bantime  = 1w
+
+[dovecot]
+enabled = true
+chain = DOCKER-USER
+
+[postfix]
+enabled = true
+mode = aggressive
+chain = DOCKER-USER
+
+[sshd]
+enabled = true
+
+# [sasl]
+# enabled  = true
+# filter   = postfix-sasl
+# action   = iptables-multiport[name=postfix, port="smtp,ssmtp,465,submission,imap,imaps,pop3,pop3s"]
+# logpath  = /var/log/mail.log
+# chain = DOCKER-USER
+
+[nginx-http-auth]
+enabled = true
+port    = http,https
+logpath = %(nginx_error_log)s
+chain = DOCKER-USER

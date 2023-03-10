@@ -101,6 +101,16 @@ services:
       - privacy
     restart: unless-stopped
 
+  mail.fl_cert:
+    build: ./mail.fl_cert
+    container_name: mail.fl_cert
+    depends_on:
+      - ssl
+    env_file:
+      - env/mail.fl_cert.env
+    networks:
+      - www
+
 networks:
   privacy:
     name: privacy
