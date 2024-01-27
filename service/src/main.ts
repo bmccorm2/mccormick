@@ -1,10 +1,9 @@
 import { NestFactory } from "@nestjs/core";
 import {
-  FastifyAdapter,
   NestFastifyApplication,
+  FastifyAdapter,
 } from "@nestjs/platform-fastify";
 import { AppModule } from "./app.module";
-import cors from "@fastify/cors";
 import "dotenv/config";
 
 (async () => {
@@ -13,7 +12,7 @@ import "dotenv/config";
     AppModule,
     new FastifyAdapter({ logger: process.env.FASTIFY_LOGGER === "true" })
   );
-  app.register(cors, { origin: process.env.CORS?.split("|") });
+  app.enableCors({ origin: process.env.CORS?.split("|") });
 
   await app.listen(process.env.PORT, "0.0.0.0");
   console.log(`Server is running on: ${await app.getUrl()}/graphiql`);

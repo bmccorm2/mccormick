@@ -142,4 +142,5 @@ log.txt
 
 .dist
 .env
+.env.prod
 **/log

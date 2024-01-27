@@ -1,6 +1,8 @@
 *@1mccormick.com    default._domainkey.1mccormick.com
 *@firestonelodging.com    default._domainkey.firestonelodging.com
+*@mccormick.sh    default._domainkey.mccormick.sh
 
 
 *@*.1mccormick.com    default._domainkey.1mccormick.com
 *@*.firestonelodging.com    default._domainkey.firestonelodging.com
+*@*.mccormick.sh    default._domainkey.mccormick.sh

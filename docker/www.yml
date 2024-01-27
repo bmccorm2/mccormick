@@ -4,92 +4,40 @@
 version: "3.7"
 
 services:
-  db:
-    container_name: db
-    image: postgres:alpine
-    restart: on-failure
-    env_file:
-      - env/db.env
+  snappymail:
+    image: djmaze/snappymail
+    container_name: snappymail
     volumes:
-      - /opt/db:/var/lib/postgresql/data
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - www
-
-  postfixadmin:
-    container_name: postfixadmin
-    build: ./postfixadmin
-    restart: on-failure
-    hostname: postfixadmin
-    volumes:
-      - /opt/certs:/etc/certs:ro
-    depends_on:
-      - db
-      - mail # needs the cert generated from the mail client
-    env_file:
-      - env/postfixadmin.env
-    networks:
-      - www
-
-  mail:
-    build: ./mail
-    container_name: mail
-    hostname: mail
-    dns: 1.1.1.1
-    depends_on:
-      - opendkim
-    volumes:
-      - /var/log:/var/log
-      - /opt/certs:/etc/certs
-      - /opt/vmail:/opt/vmail
-    env_file:
-      - env/mail.env
-    ports:
-      - "25:25"
-      - "465:465"
-      - "993:993"
-    networks:
-      - www
-
-  opendkim:
-    build: ./opendkim
-    container_name: opendkim
-    volumes:
-      - /opt/opendkim/1mccormick.com/default.private:/etc/opendkim/keys/1mccormick.com/default.private
-      - /opt/opendkim/firestonelodging.com/default.private:/etc/opendkim/keys/firestonelodging.com/default.private
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - www
-
-  rainloop:
-    image: hardware/rainloop
-    container_name: rainloop
-    volumes:
-      - /opt/rainloop:/rainloop/data
+      - /opt/snappymail:/var/lib/snappymail
       - /etc/localtime:/etc/localtime:ro
     env_file:
-      - env/rainloop.env
-    depends_on:
-      - mail
+      - env/snappymail.env
     networks:
       - www
 
-  service:
-    container_name: service
-    image: bmccorm2/service
+  # service:
+  #   container_name: service
+  #   image: bmccorm2/service
+  #   restart: on-failure
+  #   depends_on:
+  #     - db
+  #   env_file:
+  #     - env/service.env
+  #   networks:
+  #     - www
+
+  web:
+    container_name: web
+    image: bmccorm2/web
     restart: on-failure
-    depends_on:
-      - db
     env_file:
-      - env/service.env
+      - env/web.env
     networks:
       - www
 
   nextcloud:
     container_name: nextcloud
     image: nextcloud:fpm-alpine
-    depends_on:
-      - db
     volumes:
       - /opt/nextcloud:/var/www/html
       - /etc/localtime:/etc/localtime:ro

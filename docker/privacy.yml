@@ -18,7 +18,21 @@ services:
       - /opt/vhost:/etc/nginx/vhost.d
       - /opt/html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /var/log/nginx:/var/log/nginx
       - /etc/static:/app/static:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - www
+      - privacy
+
+  db:
+    container_name: db
+    image: postgres:15.4-alpine3.18
+    restart: on-failure
+    env_file:
+      - env/db.env
+    volumes:
+      - /opt/db:/var/lib/postgresql/data
       - /etc/localtime:/etc/localtime:ro
     networks:
       - www
@@ -42,6 +56,65 @@ services:
       - www
       - privacy
 
+  postfixadmin:
+    container_name: postfixadmin
+    build: ./postfixadmin
+    restart: on-failure
+    hostname: postfixadmin
+    volumes:
+      - /opt/certs:/etc/certs:ro
+    depends_on:
+      - db
+    env_file:
+      - env/postfixadmin.env
+    networks:
+      - privacy
+
+  mail.fl_cert:
+    build: ./mail.fl_cert
+    container_name: mail.fl_cert
+    depends_on:
+      - ssl
+    env_file:
+      - env/mail.fl_cert.env
+    networks:
+      - privacy
+
+  opendkim:
+    build: ./opendkim
+    container_name: opendkim
+    depends_on:
+      - ssl
+    volumes:
+      - /opt/opendkim/keys/mccormick.sh/default.private:/etc/opendkim/keys/mccormick.sh/default.private
+      - /opt/opendkim/keys/1mccormick.com/default.private:/etc/opendkim/keys/1mccormick.com/default.private
+      - /opt/opendkim/keys/firestonelodging.com/default.private:/etc/opendkim/keys/firestonelodging.com/default.private
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - privacy
+
+  mail:
+    build: ./mail
+    container_name: mail
+    hostname: mail
+    dns: 1.1.1.1
+    depends_on:
+      - opendkim
+      - db
+    volumes:
+      - /var/log:/var/log
+      - /opt/certs:/etc/certs
+      - /opt/vmail:/opt/vmail
+    env_file:
+      - env/mail.env
+    ports:
+      - "25:25"
+      - "465:465"
+      - "993:993"
+      - "4190:4190"
+    networks:
+      - privacy
+
   vault:
     container_name: vault
     image: vaultwarden/server:alpine
@@ -54,7 +127,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     restart: always
     networks:
-      - www
+      - privacy
 
   pihole:
     container_name: pihole
@@ -100,16 +173,6 @@ services:
     networks:
       - privacy
     restart: unless-stopped
-
-  mail.fl_cert:
-    build: ./mail.fl_cert
-    container_name: mail.fl_cert
-    depends_on:
-      - ssl
-    env_file:
-      - env/mail.fl_cert.env
-    networks:
-      - www
 
 networks:
   privacy:

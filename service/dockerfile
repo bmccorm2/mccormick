@@ -13,7 +13,7 @@ RUN apk add tzdata
 ENV TZ=America/Denver
 RUN npm install -g pnpm
 COPY package.json ./
-COPY .env ./
+COPY .env.prod ./.env
 COPY --from=development /app/dist ./dist
 RUN pnpm i --prod && pnpm store prune
 CMD ["pnpm","run","start:prod"]

@@ -64,12 +64,34 @@ type Yield {
   effectiveDate: String!
 }
 
+type Book {
+  id: Int!
+  title: String!
+  author: String!
+  review: String
+  pages: Int!
+  rating: Int!
+  isFiction: Boolean!
+  createDate: DateTime!
+  publishDate: String
+  genres: [Genre!]!
+}
+
+type Genre {
+  id: Int!
+  description: String!
+  books: [Book!]!
+}
+
 type Query {
   carDetails(carId: Int!): [CarDetail!]!
   cars(isOwned: Boolean): [Car!]
   consumption(carId: Int!): [Consumption!]!
   summary(carId: Int!): Summary!
   yields: [Yield!]!
+  genres: [Genre!]!
+  books: [Book!]!
+  book(id: Int!): Book
 }
 
 type Mutation {
@@ -77,4 +99,9 @@ type Mutation {
   createCar(displayName: String!, searchUrl: String, isOwned: Boolean!): Boolean!
   createConsumption(price: Float!, gallons: Float!, miles: Float!, notes: String, carId: Int!): Boolean!
   createYield(oneMonth: Float!, twoMonth: Float!, threeMonth: Float!, sixMonth: Float!, oneYear: Float!, twoYear: Float!, threeYear: Float!, fiveYear: Float!, sevenYear: Float!, tenYear: Float!, twentyYear: Float!, thirtyYear: Float!, effectiveDate: String!): Boolean!
+  createGenre(description: String!): Boolean!
+  deleteGenre(id: Int!): Boolean!
+  createBook(title: String!, author: String!, pages: Int!, rating: Int!, isFiction: Boolean!, genres: [Int!]!, publishDate: String, review: String): Boolean!
+  updateBook(id: Int!, title: String!, author: String!, pages: Int!, rating: Int!, isFiction: Boolean!, selectedGenres: [Int!]!, publishDate: String, review: String): Boolean!
+  deleteBook(id: Int!): Boolean!
 }

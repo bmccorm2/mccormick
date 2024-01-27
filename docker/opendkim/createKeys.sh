@@ -1,7 +1,8 @@
 #!/bin/sh
 
-docker run --rm -v /opt/opendkim/1mccormick.com:/tmp -w /tmp --entrypoint opendkim-genkey \
+# just change the directory if this command doesn't work
+docker run --rm -v /opt/opendkim/keys:/tmp -w /tmp --entrypoint opendkim-genkey \
        instrumentisto/opendkim \
            --subdomains \
-           --domain=1mccormick.com \
+           --domain=mccormick.sh \
            --selector=default

@@ -7,6 +7,8 @@ import { CarDetailResolver } from "./resolver/CarDetailResolver";
 import { CarResolver } from "./resolver/CarResolver";
 import { ConsumptionResolver } from "./resolver/ConsumptionResolver";
 import { YieldResolver } from "./resolver/YieldResolver";
+import { GenreResolver } from "./resolver/GenreResolver";
+import { BookResolver } from "./resolver/BookResolver";
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { YieldResolver } from "./resolver/YieldResolver";
     CarResolver,
     ConsumptionResolver,
     YieldResolver,
+    GenreResolver,
+    BookResolver,
   ],
 })
 export class AppModule {}
