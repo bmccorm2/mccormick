@@ -1,4 +1,4 @@
-# 1mccormick
+# mccormick.sh
 
 ## Resources
 

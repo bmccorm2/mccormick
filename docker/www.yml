@@ -26,14 +26,14 @@ services:
   #   networks:
   #     - www
 
-  web:
-    container_name: web
-    image: bmccorm2/web
-    restart: on-failure
-    env_file:
-      - env/web.env
-    networks:
-      - www
+  # web:
+  #   container_name: web
+  #   image: bmccorm2/web
+  #   restart: on-failure
+  #   env_file:
+  #     - env/web.env
+  #   networks:
+  #     - www
 
   nextcloud:
     container_name: nextcloud
