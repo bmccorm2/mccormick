@@ -1,7 +1,7 @@
 # To bring up an environment, first define it: export ENV=dev
 # DEV - Next bring up the environment with its respective yml file: docker-compose up
 
-version: "3.7"
+version: '3.7'
 
 services:
   proxy:
@@ -11,8 +11,8 @@ services:
     environment:
       - TRUST_DOWNSTREAM_PROXY=false
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - /opt/certs:/etc/nginx/certs
       - /opt/vhost:/etc/nginx/vhost.d
@@ -108,10 +108,10 @@ services:
     env_file:
       - env/mail.env
     ports:
-      - "25:25"
-      - "465:465"
-      - "993:993"
-      - "4190:4190"
+      - '25:25'
+      - '465:465'
+      - '993:993'
+      - '4190:4190'
     networks:
       - privacy
 
@@ -134,13 +134,12 @@ services:
     hostname: pihole
     image: pihole/pihole:latest
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      - '53:53/tcp'
+      - '53:53/udp'
     env_file:
       - env/pihole.${ENV}.env
     volumes:
-      - "./opt/pihole:/etc/pihole"
-      - "./opt/dnsmasq.d:/etc/dnsmasq.d"
+      - /opt/pihole:/etc/pihole
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     networks:
@@ -180,10 +179,10 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: "172.19.0.0/24"
+        - subnet: '172.19.0.0/24'
   www:
     name: www
     ipam:
       driver: default
       config:
-        - subnet: "172.26.0.0/24"
+        - subnet: '172.26.0.0/24'
